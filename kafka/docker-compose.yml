@@ -1,0 +1,52 @@
+version: "2"
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    networks:
+      - kafka_network
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      KAFKA_HEAP_OPTS: -Xmx256M -Xms128M
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    container_name: kafka
+    networks:
+      - kafka_network
+    depends_on:
+      - zookeeper
+    ports:
+      - "29092:29092"
+      - "29093:29093"
+    environment:
+      KAFKA_BROOKED_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: EXTERNAL_SAME_HOST://:29092,INTERNAL://:9092,EXTERNAL_DIFERENT_HOST://:29093
+      KAFKA_ADVERTISED_LISTENERS: EXTERNAL_SAME_HOST://localhost:29092,INTERNAL://kafka:9092, EXTERNAL_DIFERENT_HOST://ec2-54-243-14-9.compute-1.amazonaws.com:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: EXTERNAL_SAME_HOST:PLAINTEXT,INTERNAL:PLAINTEXT,EXTERNAL_DIFERENT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_HEAP_OPTS: -Xmx256M -Xms128M
+
+  kafdrop:
+    image: obsidiandynamics/kafdrop
+    restart: "no"
+    networks:
+      - kafka_network
+    ports:
+      - "9000:9000"
+    environment:
+      KAFKA_BROKERCONNECT: "kafka:9092"
+    depends_on:
+      - kafka
+
+volumes:
+  node_modules:
+
+networks:
+  kafka_network:
+    name: kafka_docker_example_net

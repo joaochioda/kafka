@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  server:
+    build:
+      context: .
+      args:
+        env: qa
+    networks:
+      - withdraw_network
+    environment:
+      - URL_KAFKA=http://3.84.115.87:29093
+      - DB_DIALECT=mysql
+      - DB_HOST=database-2.csdzxow3lhgf.us-east-1.rds.amazonaws.com
+      - DB_USERNAME=admin
+      - DB_PASSWORD=joao1234
+      - DB_PORT=3306
+      - DB_DATABASE=pocpoc
+      - ENV=qa
+    volumes:
+      - .:/usr/app
+      - node_modules:/usr/app/node_modules
+    ports:
+      - "5001:5001"
+
+volumes:
+  node_modules:
+
+networks:
+  withdraw_network:
+    external:
+      name: kafka_docker_example_net
